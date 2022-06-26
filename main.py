@@ -4,7 +4,7 @@ import logging
 
 from pyrogram import Client
 from pyrogram import StopPropagation, filters
-from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, User, ChatJoinRequest
 
 import config
 from handlers.broadcast import broadcast
@@ -15,6 +15,9 @@ LOG_CHANNEL = config.LOG_CHANNEL
 AUTH_USERS = config.AUTH_USERS
 DB_URL = config.DB_URL
 DB_NAME = config.DB_NAME
+CHAT_ID=int(os.environ.get("CHAT_ID", None))
+TEXT=os.environ.get("APPROVED_WELCOME_TEXT", "Hello {mention}\nWelcome To {title}\n\nYour Auto Approved")
+APPROVED = os.environ.get("APPROVED_WELCOME", "on").lower()
 
 db = Database(DB_URL, DB_NAME)
 
@@ -48,17 +51,26 @@ async def startprivate(client, message):
     joinButton = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("CHANNEL", url="https://t.me/nacbots"),
+                InlineKeyboardButton("CHANNEL", url="https://t.me/tamilbots"),
                 InlineKeyboardButton(
-                    "SUPPORT GROUP", url="https://t.me/n_a_c_bot_developers"
+                    "SUPPORT GROUP", url="https://t.me/TamilSupport"
                 ),
             ]
         ]
     )
-    welcomed = f"Hey <b>{message.from_user.first_name}</b>\nI'm a simple Telegram bot that can broadcast messages and media to the bot subscribers. Made by @NACBOTS.\n\n 🎚 use /settings"
+    welcomed =f"**__Hεүү, Iam Auto Approved Join Request Bot\n\n• I can Auto approve new join requests In Channels And Groups\n• Make Me Admin In Ur Channel Or Group With Invite Users Permission, Then See The magic ✨.\n\nMade by @TamilBots"
     await message.reply_text(welcomed, reply_markup=joinButton)
     raise StopPropagation
 
+@Bot.on_chat_join_request(filters.chat(CHAT_ID))
+async def autoapprove(client: Bot, message: ChatJoinRequest):
+    chat=message.chat # Chat
+    user=message.from_user # User
+    print(f"{user.first_name} Joined 🤝") # Logs
+    await client.approve_chat_join_request(chat_id=chat.id, user_id=user.id)
+    if APPROVED == "on":
+        await client.send_message(chat_id=chat.id, text=TEXT.format(mention=user.mention, title=chat.title))
+        print("Welcome....")
 
 @Bot.on_message(filters.command("settings"))
 async def opensettings(bot, cmd):
