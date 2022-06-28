@@ -2,6 +2,8 @@ import os
 import traceback
 import logging
 import asyncio
+import pyrogram
+
 from pyrogram import Client
 from pyrogram import StopPropagation, filters
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, User, ChatJoinRequest
