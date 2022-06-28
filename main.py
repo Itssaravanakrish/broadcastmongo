@@ -1,7 +1,7 @@
 import os
 import traceback
 import logging
-
+import asyncio
 from pyrogram import Client
 from pyrogram import StopPropagation, filters
 from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, User, ChatJoinRequest
@@ -69,7 +69,10 @@ async def autoapprove(client: Bot, message: ChatJoinRequest):
     print(f"{user.first_name} Joined 🤝") # Logs
     await client.approve_chat_join_request(chat_id=chat.id, user_id=user.id)
     if APPROVED == "on":
-        await client.send_message(chat_id=chat.id, text=TEXT.format(mention=user.mention, title=chat.title))
+        a = await client.send_message(chat_id=chat.id, text=TEXT.format(mention=user.mention, title=chat.title))
+        await asyncio.sleep(60) 
+        await message.delete() 
+        await a.delete()
         print("Welcome....")
 
 @Bot.on_message(filters.command("settings"))
